@@ -2,8 +2,11 @@ import Database from "better-sqlite3";
 import { singleton } from "~/utils/singleton.server";
 import { sleep } from "./sleep";
 import { MovieDb } from "moviedb-promise";
+import { existsSync, mkdirSync } from "fs";
 
 const db = singleton("db", () => {
+  if (!existsSync("./database")) mkdirSync("./database");
+
   const init = new Database("database/storage.db");
 
   init
@@ -13,7 +16,7 @@ const db = singleton("db", () => {
         movie_id INTEGER NOT NULL,
         text VARCHAR(500) NULL DEFAULT NULL,
         rating INTEGER NOT NULL
-      )`
+      )`,
     )
     .run();
 
@@ -22,7 +25,7 @@ const db = singleton("db", () => {
 
 const moviedb = singleton(
   "moviedb",
-  () => new MovieDb(process.env.MOVIEDB_API_KEY ?? "")
+  () => new MovieDb(process.env.MOVIEDB_API_KEY ?? ""),
 );
 
 export async function createMovieReview(
@@ -31,7 +34,7 @@ export async function createMovieReview(
     text: string;
     rating: number;
   },
-  wait?: number
+  wait?: number,
 ) {
   if (wait) await sleep(wait);
 
@@ -63,7 +66,7 @@ export async function deleteMovieReview(params: { id: number }, wait?: number) {
 
 export async function getMovies(
   params?: { search?: string | null },
-  wait?: number
+  wait?: number,
 ) {
   if (wait) await sleep(wait);
 
